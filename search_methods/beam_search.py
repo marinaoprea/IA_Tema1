@@ -8,11 +8,11 @@ from scipy.optimize import linear_sum_assignment
 
 import sokoban.gif as gif
 
-k = 50
+k = 15
 
 from search_methods.lrta_star import bfs
 
-inf = 1000000
+inf = 20
 
 def eval(map: Map, map_box_target: dict) -> int:
     ans = 0
@@ -24,7 +24,10 @@ def eval(map: Map, map_box_target: dict) -> int:
 
     for k, v in map.positions_of_boxes.items(): # v is box name
         t_x, t_y = map_box_target[v]
-        ans += bfs(map, (t_x, t_y), k)
+        dist = bfs(map, (t_x, t_y), k)
+        ans += dist
+        if dist == 0:
+            ans -= 3
     
     x_player, y_player = map.player.x, map.player.y
     distances = []
@@ -34,15 +37,15 @@ def eval(map: Map, map_box_target: dict) -> int:
     if distances:
         ans += min(distances)
 
-    for x, y in map.positions_of_boxes:
-        if x == 0 and y == 0:
-            ans += inf
-        elif x == 0 and y == map.width - 1:
-            ans += inf
-        elif x == map.length - 1 and y == 0:
-            ans += inf
-        elif x == map.length - 1 and y == map.width - 1:
-            ans += inf
+    # for x, y in map.positions_of_boxes:
+    #     if x == 0 and y == 0:
+    #         ans += inf
+    #     elif x == 0 and y == map.width - 1:
+    #         ans += inf
+    #     elif x == map.length - 1 and y == 0:
+    #         ans += inf
+    #     elif x == map.length - 1 and y == map.width - 1:
+    #         ans += inf
     
     return ans
 
@@ -103,6 +106,18 @@ class Beam_search:
                     self.path[str(neigh)] = str(state)
                     visited.add(str(neigh))
                     
+            if not new_states:
+                state = open_states[0][1]
+                if debug:
+                    all_strs_path = []
+                    str_curr = str(state)
+                    while str_curr:
+                        all_strs_path.insert(0, str_curr)
+                        str_curr = self.path[str_curr]
+
+                    gif.save_images(all_strs_path, f"images/img/{self.name}")
+                    gif.create_gif(f"images/img/{self.name}", f"{self.name}", f"images/gif/{self.name}")
+
             self.no_states += len(new_states)
 
             new_states.sort()

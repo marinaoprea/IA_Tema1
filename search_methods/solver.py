@@ -17,6 +17,7 @@ class Solver:
             print(f'number of explored states is {final_state.explored_states}')
             print(f'number of undo moves is {final_state.undo_moves}')
         print(f'explored {self.beam_solver.no_states}')
+
         return final_state
 
 
