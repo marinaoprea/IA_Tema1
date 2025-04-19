@@ -61,11 +61,6 @@ class Map:
             self.targets.append((target_x, target_y))
             self.map[target_x][target_y] = TARGET_SYMBOL
 
-    # def __eq__(self, other):
-    #     if not isinstance(other, Map):
-    #         return False
-    #     return str(self) == str(other)
-
     @classmethod
     def from_str(cls, state_str):
         rows = state_str.strip().split('\n')

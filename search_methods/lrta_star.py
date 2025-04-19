@@ -32,8 +32,8 @@ def bfs(map: Map, source : Tuple[int, int], target: Tuple[int, int]) -> int:
                 continue
             if (nextx, nexty) in map.obstacles:
                 continue
-            if (nextx, nexty) in map.targets:
-                continue
+            # if (nextx, nexty) in map.targets:
+            #     continue
             if (nextx, nexty) in map.positions_of_boxes and (nextx, nexty) != target:
                 continue
             if 1 + dist[curr[0]][curr[1]] < dist[nextx][nexty]:
@@ -85,11 +85,12 @@ def h(map: Map, map_box_target: dict):
     return ans
 
 class Lrta:
-    def __init__(self, map : Map):
+    def __init__(self, map : Map, name):
         self.map = map
         self.no_states = 0
         self.H = {}
         self.res = {}
+        self.name = name
 
         box_index = {}
         i = 0
