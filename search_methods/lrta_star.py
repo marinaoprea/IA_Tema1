@@ -10,7 +10,7 @@ from scipy.optimize import linear_sum_assignment
 import numpy as np
 
 
-def bfs(map: Map, source : Tuple[int, int], target: Tuple[int, int]) -> int:
+def bfs(map: Map, source : Tuple[int, int], target: Tuple[int, int], tunnel=False) -> int:
     dist = [[10000000 for _ in range(map.width)] for _ in range(map.length)]
     dist[source[0]][source[1]] = 0
     q = [source]
@@ -36,6 +36,14 @@ def bfs(map: Map, source : Tuple[int, int], target: Tuple[int, int]) -> int:
             #     continue
             if (nextx, nexty) in map.positions_of_boxes and (nextx, nexty) != target:
                 continue
+
+            if tunnel:
+                prevx, prevy = curr[0] - dirx[move], curr[1] - diry[move]
+                if (prevx, prevy) in map.obstacles:
+                    continue
+                if prevx < 0 or prevx >= map.length or prevy < 0 or prevy >= map.width:
+                    continue
+
             if 1 + dist[curr[0]][curr[1]] < dist[nextx][nexty]:
                 dist[nextx][nexty] = 1 + dist[curr[0]][curr[1]]
                 q.append((nextx, nexty))

@@ -8,7 +8,9 @@ from scipy.optimize import linear_sum_assignment
 
 import sokoban.gif as gif
 
-k = 15
+import sokoban.moves as mv
+
+k = 50
 
 from search_methods.lrta_star import bfs
 
@@ -24,10 +26,11 @@ def eval(map: Map, map_box_target: dict) -> int:
 
     for k, v in map.positions_of_boxes.items(): # v is box name
         t_x, t_y = map_box_target[v]
-        dist = bfs(map, (t_x, t_y), k)
+        # dist = bfs(map, (t_x, t_y), k)
+        dist = bfs(map, k, (t_x, t_y), tunnel=True)
         ans += dist
         if dist == 0:
-            ans -= 3
+            ans -= len(map.boxes)
     
     x_player, y_player = map.player.x, map.player.y
     distances = []
@@ -35,7 +38,44 @@ def eval(map: Map, map_box_target: dict) -> int:
         distances.append(bfs(map, (x_player, y_player), box))
     
     if distances:
-        ans += min(distances)
+        min_dist = min(distances)
+        ans += min_dist
+        if min_dist == 1:
+            idx = distances.index(min_dist)
+            box_x, box_y = boxes[idx]
+            moves = map.filter_possible_moves()
+            if box_x == x_player + 1 and mv.UP in moves:
+                box_name = map.positions_of_boxes[(box_x, box_y)]
+                t_x, t_y = map_box_target[box_name]
+                dist = bfs(map, (box_x + 1, box_y), (t_x, t_y))
+                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
+                    ans -= 2
+                    print("reduction")
+            elif box_x == x_player - 1 and mv.DOWN in moves:
+                box_name = map.positions_of_boxes[(box_x, box_y)]
+                t_x, t_y = map_box_target[box_name]
+                dist = bfs(map, (box_x - 1, box_y), (t_x, t_y))
+                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
+                    ans -= 2
+                    print("reduction")
+            elif box_y == y_player + 1 and mv.RIGHT in moves:
+                box_name = map.positions_of_boxes[(box_x, box_y)]
+                t_x, t_y = map_box_target[box_name]
+                dist = bfs(map, (box_x, box_y + 1), (t_x, t_y))
+                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
+                    ans -= 2
+                    print("reduction")
+            elif box_y == y_player - 1 and mv.LEFT in moves:
+                box_name = map.positions_of_boxes[(box_x, box_y)]
+                t_x, t_y = map_box_target[box_name]
+                dist = bfs(map, (box_x, box_y - 1), (t_x, t_y))
+                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
+                    ans -= 2
+                    print("reduction")
+            # else:
+            #     ans += 10
+    
+        # ans += min(distances)
 
     # for x, y in map.positions_of_boxes:
     #     if x == 0 and y == 0:
@@ -47,6 +87,8 @@ def eval(map: Map, map_box_target: dict) -> int:
     #     elif x == map.length - 1 and y == map.width - 1:
     #         ans += inf
     
+    ans += map.undo_moves * 10
+
     return ans
 
 class Beam_search:
