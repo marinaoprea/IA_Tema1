@@ -157,8 +157,8 @@ class Beam_search:
                         all_strs_path.insert(0, str_curr)
                         str_curr = self.path[str_curr]
 
-                    gif.save_images(all_strs_path, f"images/img/{self.name}")
-                    gif.create_gif(f"images/img/{self.name}", f"{self.name}", f"images/gif/{self.name}")
+                    gif.save_images(all_strs_path, f"images/img/beam_search/{self.name}")
+                    gif.create_gif(f"images/img/beam_search/{self.name}", f"{self.name}", f"images/gif/beam_search/{self.name}")
 
             self.no_states += len(new_states)
 

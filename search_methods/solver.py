@@ -1,6 +1,7 @@
 from sokoban.map import Map
 from search_methods.beam_search import Beam_search
 from search_methods.lrta_star import Lrta
+from typing import Tuple
 
 class Solver:
 
@@ -21,11 +22,11 @@ class Solver:
         return final_state
 
 
-    def solve_lrta_star(self, debug=False) -> Map:
+    def solve_lrta_star(self, debug=False) -> Tuple[Map, int]:
         print("------lrta* search-----")
-        final_state = self.lrta_solver.solve()
+        final_state, pull_moves = self.lrta_solver.solve(debug)
         print(final_state)
         if final_state:
             print(f'number of explored states is {final_state.explored_states}')
-            print(f'number of undo moves is {final_state.undo_moves}')
-        return final_state
+            print(f'number of undo moves is {pull_moves}')
+        return final_state, pull_moves
