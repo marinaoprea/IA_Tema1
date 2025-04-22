@@ -5,28 +5,29 @@ from typing import Tuple
 
 class Solver:
 
-    def __init__(self, map: Map, name: str) -> None:
+    def __init__(self, map: Map, name: str, typ: str, h) -> None:
         self.map = map
-        self.beam_solver = Beam_search(self.map, name)
-        self.lrta_solver = Lrta(self.map, name)
+        if typ == "beam":
+            self.solver = Beam_search(h, self.map, name)
+        elif typ == "lrta":
+            self.solver = Lrta(h, self.map, name)
         self.name = name
+        self.type = typ
 
-    def solve_beam_search(self, debug=False) -> Map:
-        print("-------beam search-----")
-        final_state = self.beam_solver.solve(debug=debug)
-        if final_state:
-            print(f'number of explored states is {final_state.explored_states}')
-            print(f'number of undo moves is {final_state.undo_moves}')
-        print(f'explored {self.beam_solver.no_states}')
+    def solve(self, debug=False):
+        if self.type == "beam":
+            print("-------beam search-----")
+            final_state = self.solver.solve(debug=debug)
+            if final_state:
+                print(f'number of explored states is {self.solver.no_states}')
+                print(f'number of undo moves is {final_state.undo_moves}')
 
-        return final_state
-
-
-    def solve_lrta_star(self, debug=False) -> Tuple[Map, int]:
-        print("------lrta* search-----")
-        final_state, pull_moves = self.lrta_solver.solve(debug)
-        print(final_state)
-        if final_state:
-            print(f'number of explored states is {final_state.explored_states}')
-            print(f'number of undo moves is {pull_moves}')
-        return final_state, pull_moves
+            return final_state
+        else:
+            print("------lrta* search-----")
+            final_state, pull_moves = self.solver.solve(debug=debug)
+            print(final_state)
+            if final_state:
+                print(f'number of explored states is {final_state.explored_states}')
+                print(f'number of undo moves is {pull_moves}')
+            return final_state, pull_moves

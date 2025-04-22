@@ -1,103 +1,25 @@
 from sokoban.map import Map
-import heapq
 from typing import Tuple
-
-import copy
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
 import sokoban.gif as gif
 
 import sokoban.moves as mv
+from search_methods.heuristics import bfs
 
 k = 50
 
-from search_methods.lrta_star import bfs
-
 inf = 20
-
-def eval(map: Map, map_box_target: dict) -> int:
-    ans = 0
-    boxes = []
-
-    for x, y in map.positions_of_boxes.keys():
-        if not (x, y) in map.targets:
-            boxes.append((x, y))
-
-    for k, v in map.positions_of_boxes.items(): # v is box name
-        t_x, t_y = map_box_target[v]
-        # dist = bfs(map, (t_x, t_y), k)
-        dist = bfs(map, k, (t_x, t_y), tunnel=True)
-        ans += dist
-        if dist == 0:
-            ans -= len(map.boxes)
-    
-    x_player, y_player = map.player.x, map.player.y
-    distances = []
-    for box in boxes:
-        distances.append(bfs(map, (x_player, y_player), box))
-    
-    if distances:
-        min_dist = min(distances)
-        ans += min_dist
-        if min_dist == 1:
-            idx = distances.index(min_dist)
-            box_x, box_y = boxes[idx]
-            moves = map.filter_possible_moves()
-            if box_x == x_player + 1 and mv.UP in moves:
-                box_name = map.positions_of_boxes[(box_x, box_y)]
-                t_x, t_y = map_box_target[box_name]
-                dist = bfs(map, (box_x + 1, box_y), (t_x, t_y))
-                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-                    ans -= 2
-                    print("reduction")
-            elif box_x == x_player - 1 and mv.DOWN in moves:
-                box_name = map.positions_of_boxes[(box_x, box_y)]
-                t_x, t_y = map_box_target[box_name]
-                dist = bfs(map, (box_x - 1, box_y), (t_x, t_y))
-                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-                    ans -= 2
-                    print("reduction")
-            elif box_y == y_player + 1 and mv.RIGHT in moves:
-                box_name = map.positions_of_boxes[(box_x, box_y)]
-                t_x, t_y = map_box_target[box_name]
-                dist = bfs(map, (box_x, box_y + 1), (t_x, t_y))
-                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-                    ans -= 2
-                    print("reduction")
-            elif box_y == y_player - 1 and mv.LEFT in moves:
-                box_name = map.positions_of_boxes[(box_x, box_y)]
-                t_x, t_y = map_box_target[box_name]
-                dist = bfs(map, (box_x, box_y - 1), (t_x, t_y))
-                if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-                    ans -= 2
-                    print("reduction")
-            # else:
-            #     ans += 10
-    
-        # ans += min(distances)
-
-    # for x, y in map.positions_of_boxes:
-    #     if x == 0 and y == 0:
-    #         ans += inf
-    #     elif x == 0 and y == map.width - 1:
-    #         ans += inf
-    #     elif x == map.length - 1 and y == 0:
-    #         ans += inf
-    #     elif x == map.length - 1 and y == map.width - 1:
-    #         ans += inf
-    
-    ans += map.undo_moves * 10
-
-    return ans
 
 class Beam_search:
 
-    def __init__(self, map: Map, name: str) -> None:
+    def __init__(self, h, map: Map, name: str) -> None:
         self.map = map
         self.no_states = 0
         self.path = {}
         self.name = name
+        self.h = h
 
         box_index = {}
         i = 0
@@ -131,9 +53,7 @@ class Beam_search:
             print(v)
 
     def solve(self, debug=False) -> Tuple[Map, int]:
-        # open_states = [(self.map, eval(self.map, self.map_box_targets))]
-        # tuple (score, state, prev)
-        open_states = [(eval(self.map, self.map_box_targets), self.map)]
+        open_states = [(self.h(self.map, self.map_box_targets), self.map)]
         self.path[str(self.map)] = None
         visited = {str(self.map)}
         while open_states:
@@ -144,7 +64,7 @@ class Beam_search:
                     if str(neigh) in visited:
                         continue
                         
-                    new_states.append((eval(neigh, self.map_box_targets), neigh))
+                    new_states.append((self.h(neigh, self.map_box_targets), neigh))
                     self.path[str(neigh)] = str(state)
                     visited.add(str(neigh))
                     
@@ -163,15 +83,6 @@ class Beam_search:
             self.no_states += len(new_states)
 
             new_states.sort()
-            i = 0
-            # aux = []
-            # while i < len(new_states) and len(aux) < k:
-            #     state = new_states[i][1]
-            #     if not str(state) in visited:
-            #         aux.append(new_states[i])
-            #     i += 1
-
-            # new_states = aux  
             if len(new_states) > k:
                 new_states = new_states[0:k]
 
