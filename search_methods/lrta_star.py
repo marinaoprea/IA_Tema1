@@ -9,6 +9,8 @@ import numpy as np
 import sokoban.gif as gif
 from search_methods.heuristics import bfs
 
+import time
+
 class Lrta:
     def __init__(self, h, map : Map, name):
         self.box_order = []
@@ -37,7 +39,7 @@ class Lrta:
         for x_t, y_t in map.targets:
             aux = []
             for x_b, y_b in map.positions_of_boxes.keys():
-                dist = bfs(map, (x_t, y_t), (x_b, y_b))
+                dist = bfs(map, (x_t, y_t), (x_b, y_b), tunnel=False)
                 aux.append(dist)
             aux2.append(aux)
 
@@ -51,10 +53,17 @@ class Lrta:
         for k, v in self.map_box_targets.items():
             print(k)
             print(v)
-
+    
+        self.exec_time = 0
+        self.i = 0
 
     def cost(self, sprev : Map, a : int):
         if not (str(sprev), a) in self.res.keys():
+            # if a > 4:
+            #     implicit_a = a - 4
+            #     future_pos = sprev.player.get_future_position(implicit_a)
+            #     if not future_pos in sprev.positions_of_boxes:
+            #         return 4 + self.h(sprev, self.map_box_targets, self.box_order)
             return self.h(sprev, self.map_box_targets, self.box_order)
         str_state = self.res[(str(sprev), a)]
         if a <= 4:
@@ -63,10 +72,12 @@ class Lrta:
         implicit_a = a - 4
         future_pos = sprev.player.get_future_position(implicit_a)
         if not future_pos in sprev.positions_of_boxes:
-            return 6 + self.H[str_state]
+            return 5 + self.H[str_state]
         return 1 + self.H[str_state]
 
     def solve(self, debug=False):
+        self.i += 1
+        start_time = time.time()
         random.seed(42)
 
         state = self.map.copy()
@@ -75,6 +86,8 @@ class Lrta:
 
         path = []
         actions = []
+
+        print("again")
 
         while True:
             path.append(str(state))
@@ -112,8 +125,12 @@ class Lrta:
                 path = aux_path
                 print(f"++++{len(path)}")
                 
-                gif.save_images(path, f"images/img/larta/{self.name}")
-                gif.create_gif(f"images/img/larta/{self.name}", f"{self.name}", f"images/gif/larta/{self.name}")
+                i = self.i
+                # gif.save_images(path, f"images/img/larta/{self.name}")
+                # gif.create_gif(f"images/img/larta/{self.name}", f"{self.name}", f"images/gif/larta/{self.name}")
+
+                end_time = time.time()
+                self.exec_time += end_time - start_time
 
                 return state, len(aux_actions)
             
@@ -155,5 +172,7 @@ class Lrta:
             state.apply_move(a)
 
             self.no_states += 1
-            if self.no_states > 100096:
+            if self.no_states > 30096:
+                end_time = time.time()
+                self.exec_time += end_time - start_time
                 return None, -10

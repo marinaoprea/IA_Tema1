@@ -7,6 +7,7 @@ import sokoban.gif as gif
 
 import sokoban.moves as mv
 from search_methods.heuristics import bfs
+import time
 
 k = 50
 
@@ -52,7 +53,11 @@ class Beam_search:
             print(k)
             print(v)
 
+        self.exec_time = -2
+
     def solve(self, debug=False) -> Tuple[Map, int]:
+        start_time = time.time()
+
         open_states = [(self.h(self.map, self.map_box_targets), self.map)]
         self.path[str(self.map)] = None
         visited = {str(self.map)}
@@ -103,6 +108,9 @@ class Beam_search:
 
                         gif.save_images(all_strs_path, f"images/img/{self.name}")
                         gif.create_gif(f"images/img/{self.name}", f"{self.name}", f"images/gif/{self.name}")
+
+                    end_time = time.time()
+                    self.exec_time = end_time - start_time
                         
                     return state
                 

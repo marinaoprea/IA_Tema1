@@ -25,7 +25,31 @@ class Solver:
             return final_state
         else:
             print("------lrta* search-----")
-            final_state, pull_moves = self.solver.solve(debug=debug)
+            # final_state, pull_moves = self.solver.solve(debug=debug)
+            min_state = None
+            min_moves = 1000
+            no_states = 0
+            box_order = self.solver.box_order
+            for _ in range(5):
+                self.solver.box_order = box_order
+                final_state, pull_moves = self.solver.solve(debug=debug)
+                print(f"pull moves {pull_moves}")
+
+                if pull_moves > 0 and pull_moves < min_moves:
+                    min_state = final_state.copy()
+                    min_moves = pull_moves
+                    no_states = self.solver.no_states
+                if pull_moves == 0:
+                    min_moves = 0
+                    no_states = self.solver.no_states
+                    break
+                self.solver.no_states = 0
+
+            final_state = min_state
+            self.solver.no_states = no_states
+            if min_moves == 1000:
+                min_moves = -10
+            pull_moves = min_moves
             print(final_state)
             if final_state:
                 print(f'number of explored states is {final_state.explored_states}')
