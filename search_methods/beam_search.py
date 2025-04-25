@@ -55,7 +55,7 @@ class Beam_search:
 
         self.exec_time = -2
 
-    def solve(self, debug=False) -> Tuple[Map, int]:
+    def solve(self, debug=False, save_gif=False) -> Tuple[Map, int]:
         start_time = time.time()
 
         open_states = [(self.h(self.map, self.map_box_targets), self.map)]
@@ -82,6 +82,7 @@ class Beam_search:
                         all_strs_path.insert(0, str_curr)
                         str_curr = self.path[str_curr]
 
+                if save_gif:
                     gif.save_images(all_strs_path, f"images/img/beam_search/{self.name}")
                     gif.create_gif(f"images/img/beam_search/{self.name}", f"{self.name}", f"images/gif/beam_search/{self.name}")
 
@@ -99,15 +100,14 @@ class Beam_search:
 
             for score, state in new_states:
                 if state.is_solved():
-                    if debug:
-                        all_strs_path = []
-                        str_curr = str(state)
-                        while str_curr:
-                            all_strs_path.insert(0, str_curr)
-                            str_curr = self.path[str_curr]
+                    all_strs_path = []
+                    str_curr = str(state)
+                    while str_curr:
+                        all_strs_path.insert(0, str_curr)
+                        str_curr = self.path[str_curr]
 
-                        gif.save_images(all_strs_path, f"images/img/{self.name}")
-                        gif.create_gif(f"images/img/{self.name}", f"{self.name}", f"images/gif/{self.name}")
+                    gif.save_images(all_strs_path, f"images/img/beam/{self.name}")
+                    gif.create_gif(f"images/img/beam/{self.name}", f"{self.name}", f"images/gif/beam/{self.name}")
 
                     end_time = time.time()
                     self.exec_time = end_time - start_time

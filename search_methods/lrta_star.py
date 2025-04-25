@@ -11,6 +11,15 @@ from search_methods.heuristics import bfs
 
 import time
 
+def get_unplaced_box(map: Map, map_box_to_targets: dict) -> int:
+    cnt = 0
+    for k, v in map.positions_of_boxes.items():
+        t_x, t_y = map_box_to_targets[v]
+        if not (k[0] == t_x and k[1] == t_y):
+            cnt += 1
+    
+    return cnt
+
 class Lrta:
     def __init__(self, h, map : Map, name):
         self.box_order = []
@@ -39,7 +48,7 @@ class Lrta:
         for x_t, y_t in map.targets:
             aux = []
             for x_b, y_b in map.positions_of_boxes.keys():
-                dist = bfs(map, (x_t, y_t), (x_b, y_b), tunnel=False)
+                dist = bfs(map, (x_t, y_t), (x_b, y_b), tunnel=True)
                 aux.append(dist)
             aux2.append(aux)
 
@@ -63,7 +72,7 @@ class Lrta:
             #     implicit_a = a - 4
             #     future_pos = sprev.player.get_future_position(implicit_a)
             #     if not future_pos in sprev.positions_of_boxes:
-            #         return 4 + self.h(sprev, self.map_box_targets, self.box_order)
+            #         return self.h(sprev, self.map_box_targets, self.box_order)
             return self.h(sprev, self.map_box_targets, self.box_order)
         str_state = self.res[(str(sprev), a)]
         if a <= 4:
@@ -75,7 +84,7 @@ class Lrta:
             return 5 + self.H[str_state]
         return 1 + self.H[str_state]
 
-    def solve(self, debug=False):
+    def solve(self, debug=False, save_gif=False):
         self.i += 1
         start_time = time.time()
         random.seed(42)
@@ -126,13 +135,11 @@ class Lrta:
                 print(f"++++{len(path)}")
                 
                 i = self.i
-                # gif.save_images(path, f"images/img/larta/{self.name}")
-                # gif.create_gif(f"images/img/larta/{self.name}", f"{self.name}", f"images/gif/larta/{self.name}")
 
                 end_time = time.time()
                 self.exec_time += end_time - start_time
 
-                return state, len(aux_actions)
+                return state, len(aux_actions), path
             
             if sprev:
                 self.res[(str(sprev), aprev)] = str(state)
@@ -142,6 +149,14 @@ class Lrta:
                 self.H[str(sprev)] = minim
 
             moves = state.filter_possible_moves()
+
+            # aux_moves = []
+            # for m in moves:
+            #     aux_state = state.copy()
+            #     aux_state.apply_move(m)
+            #     if get_unplaced_box(aux_state, self.map_box_targets) <= get_unplaced_box(state, self.map_box_targets):
+            #         aux_moves.append(m)
+            # moves = aux_moves
 
             aux = [self.cost(state, b) for b in moves]
 
@@ -172,7 +187,7 @@ class Lrta:
             state.apply_move(a)
 
             self.no_states += 1
-            if self.no_states > 30096:
+            if self.no_states > 30000:
                 end_time = time.time()
                 self.exec_time += end_time - start_time
-                return None, -10
+                return None, -10, []
