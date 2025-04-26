@@ -64,38 +64,6 @@ def eval_beam_search_bfs(map: Map, map_box_target: dict) -> int:
     if distances:
         min_dist = min(distances)
         ans += min_dist
-        # if min_dist == 1:
-        #     idx = distances.index(min_dist)
-        #     box_x, box_y = boxes[idx]
-        #     moves = map.filter_possible_moves()
-        #     if box_x == x_player + 1 and mv.UP in moves:
-        #         box_name = map.positions_of_boxes[(box_x, box_y)]
-        #         t_x, t_y = map_box_target[box_name]
-        #         dist = bfs(map, (box_x + 1, box_y), (t_x, t_y))
-        #         if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-        #             ans -= 2
-        #             # print("reduction")
-        #     elif box_x == x_player - 1 and mv.DOWN in moves:
-        #         box_name = map.positions_of_boxes[(box_x, box_y)]
-        #         t_x, t_y = map_box_target[box_name]
-        #         dist = bfs(map, (box_x - 1, box_y), (t_x, t_y))
-        #         if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-        #             ans -= 2
-        #             # print("reduction")
-        #     elif box_y == y_player + 1 and mv.RIGHT in moves:
-        #         box_name = map.positions_of_boxes[(box_x, box_y)]
-        #         t_x, t_y = map_box_target[box_name]
-        #         dist = bfs(map, (box_x, box_y + 1), (t_x, t_y))
-        #         if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-        #             ans -= 2
-        #             # print("reduction")
-        #     elif box_y == y_player - 1 and mv.LEFT in moves:
-        #         box_name = map.positions_of_boxes[(box_x, box_y)]
-        #         t_x, t_y = map_box_target[box_name]
-        #         dist = bfs(map, (box_x, box_y - 1), (t_x, t_y))
-        #         if dist < bfs(map, (box_x, box_y), (t_x, t_y)):
-        #             ans -= 2
-        #             # print("reduction")
     
     ans += map.undo_moves * 10
 
@@ -111,7 +79,6 @@ def eval_beam_search_manhattan(map: Map, map_box_target: dict) -> int:
 
     for k, v in map.positions_of_boxes.items(): # v is box name
         t_x, t_y = map_box_target[v]
-        # dist = bfs(map, k, (t_x, t_y), tunnel=True)
         dist = abs(t_x - k[0]) + abs(t_y - k[1])
         ans += dist
         if dist == 0:
@@ -137,15 +104,6 @@ def eval_lrta_bfs_no_box_order(map: Map, map_box_target: dict, box_order: list):
     for x, y in map.positions_of_boxes.keys():
         if not (x, y) in map.targets:
             boxes.append((x, y))
-
-    # for x, y in boxes:
-    #     dummy = Dummy(x, y)
-    #     cnt = 0
-    #     for m in range(1, 5):
-    #         if map.object_valid_move(dummy, m):
-    #             cnt += 1
-    #     if cnt < 2:
-    #         ans += 1000
 
     for k, v in map.positions_of_boxes.items(): # v is box name
         t_x, t_y = map_box_target[v]
@@ -176,7 +134,6 @@ def eval_lrta_bfs_box_order(map: Map, map_box_target: dict, box_order: list):
         dist = bfs(map, k, (t_x, t_y), tunnel=True)
         ans += dist
 
-    # print(f"^^^^{box_order}")
     x_player, y_player = map.player.x, map.player.y
     if box_order:
         box_name = box_order[0]

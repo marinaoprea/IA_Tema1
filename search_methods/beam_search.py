@@ -50,8 +50,7 @@ class Beam_search:
             self.map_box_targets[box_index[b_i]] = target_index[t_i]
             
         for k, v in self.map_box_targets.items():
-            print(k)
-            print(v)
+            print(f"{k} with target {v}")
 
         self.exec_time = -2
 
@@ -76,15 +75,13 @@ class Beam_search:
             if not new_states:
                 state = open_states[0][1]
                 if debug:
+                    print("printing path")
                     all_strs_path = []
                     str_curr = str(state)
                     while str_curr:
+                        print(str_curr)
                         all_strs_path.insert(0, str_curr)
                         str_curr = self.path[str_curr]
-
-                if save_gif:
-                    gif.save_images(all_strs_path, f"images/img/beam_search/{self.name}")
-                    gif.create_gif(f"images/img/beam_search/{self.name}", f"{self.name}", f"images/gif/beam_search/{self.name}")
 
             self.no_states += len(new_states)
 
@@ -106,17 +103,18 @@ class Beam_search:
                         all_strs_path.insert(0, str_curr)
                         str_curr = self.path[str_curr]
 
-                    gif.save_images(all_strs_path, f"images/img/beam/{self.name}")
-                    gif.create_gif(f"images/img/beam/{self.name}", f"{self.name}", f"images/gif/beam/{self.name}")
+                    if save_gif:
+                        gif.save_images(all_strs_path, f"images/img/beam/{self.name}")
+                        gif.create_gif(f"images/img/beam/{self.name}", f"{self.name}", f"images/gif/beam/{self.name}")
 
                     end_time = time.time()
                     self.exec_time = end_time - start_time
                         
-                    return state
+                    return state, len(all_strs_path)
                 
             if self.no_states > 60096:
-                return None
+                return None, 0
             
             open_states = new_states
         
-        return None
+        return None, 0

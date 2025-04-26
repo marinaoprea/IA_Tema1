@@ -18,12 +18,13 @@ class Solver:
     def solve(self, debug=False, save_gif=False):
         if self.type == "beam":
             print("-------beam search-----")
-            final_state = self.solver.solve(debug=debug, save_gif=save_gif)
+            final_state, path_len = self.solver.solve(debug=debug, save_gif=save_gif)
             if final_state:
                 print(f'number of explored states is {self.solver.no_states}')
                 print(f'number of undo moves is {final_state.undo_moves}')
+                print(f'path length is {path_len}')
 
-            return final_state
+            return final_state, path_len
         else:
             print("------lrta* search-----")
             # final_state, pull_moves = self.solver.solve(debug=debug)
@@ -32,7 +33,7 @@ class Solver:
             no_states = 0
             box_order = self.solver.box_order
             best_path = []
-            for _ in range(5):
+            for _ in range(1):
                 self.solver.box_order = box_order
                 final_state, pull_moves, path = self.solver.solve(debug=debug, save_gif=save_gif)
                 no_states += self.solver.no_states
@@ -41,12 +42,11 @@ class Solver:
                 if pull_moves > 0 and pull_moves < min_moves:
                     min_state = final_state.copy()
                     min_moves = pull_moves
-                    # no_states = self.solver.no_states
                     best_path = path
                 if pull_moves == 0:
                     min_moves = 0
-                    # no_states = self.solver.no_states
                     best_path = path
+                    min_state = final_state.copy()
                     break
                 self.solver.no_states = 0
 
@@ -63,4 +63,8 @@ class Solver:
             if final_state:
                 print(f'number of explored states is {final_state.explored_states}')
                 print(f'number of undo moves is {pull_moves}')
-            return final_state, pull_moves
+
+            path_len = len(best_path)
+            if path_len == 0:
+                path_len = -10
+            return final_state, pull_moves, path_len
