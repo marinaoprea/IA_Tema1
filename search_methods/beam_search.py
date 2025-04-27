@@ -1,17 +1,13 @@
-from sokoban.map import Map
-from typing import Tuple
+import time
 import numpy as np
 from scipy.optimize import linear_sum_assignment
+from typing import Tuple
 
 import sokoban.gif as gif
-
-import sokoban.moves as mv
+from sokoban.map import Map
 from search_methods.heuristics import bfs
-import time
 
 k = 50
-
-inf = 20
 
 class Beam_search:
 

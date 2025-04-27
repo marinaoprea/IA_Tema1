@@ -1,7 +1,6 @@
+from typing import Tuple
 from sokoban.map import Map
 from sokoban.dummy import Dummy
-from typing import Tuple
-import sokoban.moves as mv
 
 def bfs(map: Map, source : Tuple[int, int], target: Tuple[int, int], tunnel=False) -> int:
     dist = [[10000000 for _ in range(map.width)] for _ in range(map.length)]

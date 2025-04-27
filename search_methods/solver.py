@@ -1,7 +1,6 @@
 from sokoban.map import Map
 from search_methods.beam_search import Beam_search
 from search_methods.lrta_star import Lrta
-from typing import Tuple
 import sokoban.gif as gif
 
 class Solver:
@@ -27,7 +26,6 @@ class Solver:
             return final_state, path_len
         else:
             print("------lrta* search-----")
-            # final_state, pull_moves = self.solver.solve(debug=debug)
             min_state = None
             min_moves = 1000
             no_states = 0
@@ -63,6 +61,7 @@ class Solver:
             if final_state:
                 print(f'number of explored states is {final_state.explored_states}')
                 print(f'number of undo moves is {pull_moves}')
+                print(f'path length is {len(best_path)}')
 
             path_len = len(best_path)
             if path_len == 0:
